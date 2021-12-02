@@ -8,7 +8,7 @@ const db = new sqlite3.Database(DBSOURCE, function (err) {
   console.log("Database connected");
 });
 
-const createTable = `CREATE TABLE "auteurs" (
+/* const createTable = `CREATE TABLE "auteurs" (
     "auteur_id" INTEGER NOT NULL,
     "voornaam" TEXT NOT NULL,
     "tussenvoegsels" TEXT,
@@ -18,7 +18,7 @@ const createTable = `CREATE TABLE "auteurs" (
     "linkedin_url" TEXT,
     "facebook_url" TEXT,
     PRIMARY KEY("auteur_id" AUTOINCREMENT)
-)`;
+)`; */
 
 /* db.run(createTable, function (error) {
   if (error) {
@@ -28,10 +28,10 @@ const createTable = `CREATE TABLE "auteurs" (
   console.log('Table "auteurs" created');
 }); */
 
-// Creating some rows
+/* // Creating some rows
 const insertRecord = `INSERT INTO "auteurs"
 	(voornaam, tussenvoegsels, achternaam, geboortedatum, nationaliteit, linkedin_url, facebook_url)
-	VALUES (?,?,?,?,?,?,?)`;
+	VALUES (?,?,?,?,?,?,?)`; */
 
 /* db.run(
   insertRecord,
@@ -64,7 +64,7 @@ const insertRecord = `INSERT INTO "auteurs"
     console.log('Record added to the table "auteurs"');
   }
 ); */
-
+/* 
 const selectQuery = `SELECT * FROM "auteurs"`; //(denk aan de backtick)
 
 db.all(selectQuery, function (err, rows) {
@@ -76,4 +76,4 @@ db.all(selectQuery, function (err, rows) {
     data: rows,
   });
 });
-
+ */
