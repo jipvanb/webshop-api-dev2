@@ -10,5 +10,3 @@ const db = new sqlite3.Database(DBSOURCE, function (err) {
 });
 
 module.exports = db;
-
-//file:///C:/Users/jipva/Desktop/school/development%202/database/boeken.db

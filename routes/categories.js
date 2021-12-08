@@ -29,7 +29,7 @@ router.get("/:id", (req, res) => {
         }
         res.status(200);
         res.json({
-            auteur: row
+            data: row
         });
     });
 });
