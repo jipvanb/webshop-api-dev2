@@ -34,4 +34,27 @@ router.get("/:id", (req, res) => {
     });
 });
 
+router.delete("/:id", (req, res) => {
+    let qry = "DELETE FROM products WHERE id = ?";
+    let params = [req.params.id];
+
+    db.run(qry, params, function (err) {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+        if (this.changes === 0) {
+            res.status(412);
+            res.json({
+                message: `Record ${req.params.id} niet gevonden.`,
+            });
+        } else {
+            res.status(200);
+            res.json({
+                message: `Record ${req.params.id} deleted.`,
+            });
+        }
+    });
+});
+
 module.exports = router;
