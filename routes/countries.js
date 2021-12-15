@@ -34,6 +34,37 @@ router.get("/:id", (req, res) => {
     });
 });
 
+router.post("/", (req, res) => {
+    let errors = [];
+    console.log(req.body);
+    if (!req.body.naam) {
+        errors.push("Geen naam ingevuld");
+    }
+    console.log(errors.length);
+    if (errors.length) {
+        res.status(400).json({ errors });
+        return;
+    }
+
+    let qry = `INSERT INTO "countries"
+	(naam)
+	VALUES (?)`;
+	console.log(qry);
+    let params = [
+        req.body.naam
+    ];
+    db.run(qry, params, function (err) {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+        res.status(200);
+        res.json({
+            id: this.lastID,
+        });
+    });
+});
+
 router.delete("/:id", (req, res) => {
     let qry = "DELETE FROM countries WHERE id = ?";
     let params = [req.params.id];
