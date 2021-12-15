@@ -3,7 +3,7 @@ const db = require("../database/connection.js");
 const router = express.Router();
 
 router.get("/", (req, res) => {
-    const qry = "select * from orders";
+    const qry = "SELECT * from orders, order_lines WHERE order_lines.orderId = orders.id";
     const params = [];
 
     db.all(qry, params, (err, rows) => {
@@ -18,42 +18,20 @@ router.get("/", (req, res) => {
     });
 });
 
-router.get("/:id", (req, res) => {
-    let qry = "select * from orders where id = ?";
-    let params = [req.params.id];
-
-    db.get(qry, params, (err, row) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.status(200);
-        res.json({
-            data: row
-        });
-    });
-});
-
 router.post("/", (req, res) => {
     let errors = [];
     console.log(req.body);
-    if (!req.body.naam) {
-        errors.push("Geen naam ingevuld");
+    if (!req.body.dateOrdered) {
+        errors.push("Geen date ingevuld");
     }
-    if (!req.body.beschrijving) {
-        errors.push("Geen naam ingevuld");
+    if (!req.body.paid) {
+        errors.push("Geen paid ingevuld");
     }
-    if (!req.body.categorie) {
-        errors.push("Geen naam ingevuld");
+    if (!req.body.shipped) {
+        errors.push("Geen shipped ingevuld");
     }
-    if (!req.body.prijs) {
-        errors.push("Geen naam ingevuld");
-    }
-    if (!req.body.dateAdded) {
-        errors.push("Geen naam ingevuld");
-    }
-    if (!req.body.voorraad) {
-        errors.push("Geen naam ingevuld");
+    if (!req.body.userId) {
+        errors.push("Geen userId ingevuld");
     }
     console.log(errors.length);
     if (errors.length) {
@@ -61,16 +39,14 @@ router.post("/", (req, res) => {
         return;
     }
 
-    let qry = `INSERT INTO "products"
-	(naam, beschrijving, categorie, prijs, dateAdded, voorraad)
-	VALUES (?,?,?,?,?,?)`;
-	console.log(qry);
+    let qry = `INSERT INTO "orders"
+	(dateOrdered, paid, shipped, userId)
+	VALUES (?,?,?,?)`;
     let params = [
         req.body.dateOrdered,
         req.body.paid,
         req.body.shipped,
-        req.body.userId,
-        req.body.lines
+        req.body.userId
     ];
     db.run(qry, params, function (err) {
         if (err) {

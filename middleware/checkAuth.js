@@ -1,7 +1,9 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const express = require("express");
+const router = express.Router();
 
-router = (req, res, next) => {
+module.exports = (req, res, next) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
     if (token == null) {
@@ -15,5 +17,3 @@ router = (req, res, next) => {
         next();
     });
 };
-
-module.exports = router;

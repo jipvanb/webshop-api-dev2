@@ -89,5 +89,25 @@ router.delete("/:id", (req, res) => {
     });
 });
 
+router.patch("/:id", (req, res) => {
+    let qry = `UPDATE categories set 
+    naam = coalesce(?,naam),
+    WHERE auteur_id = ?`;
+
+    let params = [
+        req.body.naam
+    ];
+
+    db.run(qry, params, function (err, result) {
+        if (err) {
+            res.status(400).json({ error: res.message });
+            return;
+        }
+        res.status(200);
+        res.json({
+            changes: this.changes,
+        });
+    });
+});
 
 module.exports = router;
