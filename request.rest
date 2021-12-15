@@ -1,1 +1,11 @@
-POST http://localhost:6000/api/users
+POST http://localhost:8000/api/categories
+
+    {
+      "naam": "test2"
+    }
+
+
+####
+GET http://localhost:8000/api/categories
+
+
