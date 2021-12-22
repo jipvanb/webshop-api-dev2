@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("../database/connection.js");
+const checkAdmin = require("../middleware/checkAdmin.js");
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -34,7 +35,7 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.post("/", (req, res) => {
+router.post("/", checkAdmin, (req, res) => {
     let errors = [];
     console.log(req.body);
     if (!req.body.naam) {
@@ -65,7 +66,7 @@ router.post("/", (req, res) => {
     });
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", checkAdmin, (req, res) => {
     let qry = "DELETE FROM countries WHERE id = ?";
     let params = [req.params.id];
 
@@ -85,6 +86,29 @@ router.delete("/:id", (req, res) => {
                 message: `Record ${req.params.id} deleted.`,
             });
         }
+    });
+});
+
+router.patch("/:id", checkAdmin, (req, res) => {
+    let qry = `UPDATE countries set 
+    naam = coalesce(?,naam)
+    WHERE id = ?`;
+
+    let params = [
+        req.body.naam,
+        req.params.id,
+    ];
+
+    db.run(qry, params, function (err, result) {
+        if (err) {
+            res.status(400).json({ error: res.message });
+            return;
+        }
+        res.status(200);
+        res.json({
+            message: "success",
+            changes: this.changes,
+        });
     });
 });
 

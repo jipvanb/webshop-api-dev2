@@ -1,8 +1,11 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
 const db = require("../database/connection.js");
+const checkAdmin = require("../middleware/checkAdmin.js");
+const checkAuth = require("../middleware/checkAuth.js");
 const router = express.Router();
 
-router.get("/", (req, res) => {
+router.get("/", checkAdmin, (req, res) => {
     const qry = "select * from users";
     const params = [];
 
@@ -34,8 +37,8 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.get("/:id/orders", (req, res) => {
-    let qry = "select orders.id, orders.dateOrdered, orders.paid, orders.shipped, order_lines.amount, order_lines.price, order_lines.productId, products.naam, users.id, users.firstName, users.middleName, users.lastName from orders, order_lines, products, users where orders.id == order_lines.orderId AND order_lines.productId == products.id AND orders.userId == users.id AND orders.id = ?";
+router.get("/:id/orders", checkAuth, (req, res) => {
+    let qry = "SELECT orders.*, order_lines.amount, order_lines.price as line_price, products.naam as product_naam, users.firstName, users.middleName, users.lastName from orders, order_lines, products, users WHERE order_lines.orderId = orders.id AND order_lines.productId = products.id AND orders.userId = users.id AND users.id = ?";
     let params = [req.params.id];
 
     db.get(qry, params, (err, row) => {
@@ -99,7 +102,7 @@ router.post("/", (req, res) => {
         req.body.postcode,
         req.body.country,
         req.body.mail,
-        req.body.password,
+        bcrypt.hashSync(req.body.password, 10),
         req.body.signedUpForNewsLetter
     ];
     db.run(qry, params, function (err) {
@@ -110,6 +113,66 @@ router.post("/", (req, res) => {
         res.status(200);
         res.json({
             id: this.lastID,
+        });
+    });
+});
+
+router.patch("/:id", checkAuth, (req, res) => {
+    let data = {
+        firstName: req.body.firstName,
+        middleName: req.body.middleName,
+        lastName: req.body.lastName,
+        straat: req.body.straat,
+        huisnummer: req.body.huisnummer,
+        toevoeging: req.body.toevoeging,
+        postcode: req.body.postcode,
+        country: req.body.country,
+        mail: req.body.mail,
+        signedUpForNewsLetter: req.body.signedUpForNewsLetter,
+        password: req.body.password
+            ? bcrypt.hashSync(req.body.password, 10)
+            : null,
+    };
+
+    let qry = `UPDATE users set 
+    firstName = coalesce(?,firstName), 
+    middleName = coalesce(?,middleName), 
+    lastName = coalesce(?,lastName),
+    straat = coalesce(?,straat),
+    huisnummer = coalesce(?,huisnummer),
+    toevoeging = coalesce(?,toevoeging),
+    postcode = coalesce(?,postcode),
+    country = coalesce(?,country),
+    mail = coalsce(?,mail),
+    password = coalsce(?,password),
+    signedUpForNewsLetter = coalsce(?,signedUpForNewsLetter)
+    WHERE id = ?`;
+
+    let params = [
+        data.firstName,
+        data.middleName,
+        data.lastName,
+        data.straat,
+        data.huisnummer,
+        data.toevoeging,
+        data.postcode,
+        data.country,
+        data.mail,
+        data.password,
+        data.signedUpForNewsLetter,
+        req.params.id,
+    ];
+
+    db.run(qry, params, function (err, result) {
+        if (err) {
+            console.log(data);
+            res.status(400).json({ error: res.message });
+            return;
+        }
+        res.status(200);
+        res.json({
+            message: "success",
+            changes: this.changes,
         });
     });
 });

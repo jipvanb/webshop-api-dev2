@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("../database/connection.js");
+const checkAdmin = require("../middleware/checkAdmin.js");
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -34,7 +35,7 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.post("/", (req, res) => {
+router.post("/", checkAdmin, (req, res) => {
     let errors = [];
     console.log(req.body);
     if (!req.body.naam) {
@@ -85,7 +86,40 @@ router.post("/", (req, res) => {
     });
 });
 
-router.delete("/:id", (req, res) => {
+router.patch("/:id", checkAdmin, (req, res) => {
+    let qry = `UPDATE products set 
+    naam = coalesce(?,naam), 
+    beschrijving = coalesce(?,beschrijving), 
+    categorie = coalesce(?,categorie),
+    prijs = coalesce(?,prijs),
+    dateAdded = coalesce(?,dateAdded),
+    voorraad = coalesce(?,voorraad)
+    WHERE id = ?`;
+
+    let params = [
+        req.body.naam,
+        req.body.beschrijving,
+        req.body.categorie,
+        req.body.prijs,
+        req.body.dateAdded,
+        req.body.voorraad,
+        req.params.id,
+    ];
+
+    db.run(qry, params, function (err, result) {
+        if (err) {
+            res.status(400).json({ error: res.message });
+            return;
+        }
+        res.status(200);
+        res.json({
+            message: "success",
+            changes: this.changes,
+        });
+    });
+});
+
+router.delete("/:id", checkAdmin, (req, res) => {
     let qry = "DELETE FROM products WHERE id = ?";
     let params = [req.params.id];
 

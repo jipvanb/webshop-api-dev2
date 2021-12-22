@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("../database/connection.js");
+const checkAdmin = require("../middleware/checkAdmin.js");
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -13,7 +14,7 @@ router.get("/", (req, res) => {
         }
         res.json({
             message: "success",
-            data: rows,
+            "categories": rows,
         });
     });
 });
@@ -34,7 +35,23 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.post("/", (req, res) => {
+router.get("/:id/products", (req, res) => {
+    let qry = "select products.* from products, categories where categories.id = ? and products.categorie = categories.id";
+    let params = [req.params.id];
+
+    db.all(qry, params, (err, rows) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+        res.status(200);
+        res.json({
+            data: rows,
+        });
+    });
+});
+
+router.post("/", checkAdmin, (req, res) => {
     let errors = [];
     console.log(req.body);
     if (!req.body.naam) {
@@ -66,7 +83,7 @@ router.post("/", (req, res) => {
 });
 
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", checkAdmin, (req, res) => {
     let qry = "DELETE FROM categories WHERE id = ?";
     let params = [req.params.id];
 
@@ -89,13 +106,14 @@ router.delete("/:id", (req, res) => {
     });
 });
 
-router.patch("/:id", (req, res) => {
+router.patch("/:id", checkAdmin, (req, res) => {
     let qry = `UPDATE categories set 
-    naam = coalesce(?,naam),
-    WHERE auteur_id = ?`;
+    naam = coalesce(?,naam)
+    WHERE id = ?`;
 
     let params = [
-        req.body.naam
+        req.body.naam,
+        req.params.id,
     ];
 
     db.run(qry, params, function (err, result) {
@@ -105,9 +123,11 @@ router.patch("/:id", (req, res) => {
         }
         res.status(200);
         res.json({
+            message: "success",
             changes: this.changes,
         });
     });
 });
+
 
 module.exports = router;

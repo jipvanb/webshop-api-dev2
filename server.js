@@ -10,6 +10,7 @@ const ordersRouter = require("./routes/orders");
 const productsRouter = require("./routes/products");
 const usersRouter = require("./routes/users");
 const checkAuth = require("./middleware/checkAuth");
+const order_linesRouter = require("./routes/order_lines");
 
 // Root path
 app.get("/", (req, res) => {
@@ -27,4 +28,5 @@ app.use("/api/countries", countriesRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/order_lines", order_linesRouter);
 app.use("/api/checkAuth", checkAuth);
